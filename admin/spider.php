@@ -94,7 +94,7 @@ if (!isset($domaincb)) {
 	}
 
 # Load keywords
-$all_keywords = new Redis('192.168.1.47', 6379);
+$all_keywords = new Redis($redis_host, $redis_port);
 
 
 if ($all ==  1) {
