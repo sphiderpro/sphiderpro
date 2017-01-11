@@ -1,4 +1,4 @@
-<?php 
+<?php
 function getFileContents($url) {
 	global $user_agent;
 	$urlparts = parse_url($url);
@@ -152,7 +152,7 @@ function url_status($url) {
 					$status['state'] = 'ok';
 				} else if ($regs[1] == 'application/pdf' && $index_pdf == 1) {
 					$status['content'] = 'pdf';
-					$status['state'] = 'ok';                                 
+					$status['state'] = 'ok';
 				} else if (($regs[1] == 'application/msword' || $regs[1] == 'application/vnd.ms-word') && $index_doc == 1) {
 					$status['content'] = 'doc';
 					$status['state'] = 'ok';
@@ -315,14 +315,14 @@ function get_links($file, $url, $can_leave_domain, $base) {
 }
 
 /*
-Function to build a unique word array from the text of a webpage, together with the count of each word 
+Function to build a unique word array from the text of a webpage, together with the count of each word
 */
 function unique_array($arr) {
 	global $min_word_length;
 	global $common;
 	global $word_upper_bound;
 	global $index_numbers, $stem_words;
-	
+
 	if ($stem_words == 1) {
 		$newarr = Array();
 		foreach ($arr as $val) {
@@ -388,7 +388,7 @@ function url_purify($url, $parent_url, $can_leave_domain) {
 	if ($urlparts['host'] != "" && $urlparts['host'] != $main_url_parts['host']  && $can_leave_domain != 1) {
 		return '';
 	}
-	
+
 	reset($ext);
 	while (list ($id, $excl) = each($ext))
 		if (preg_match("/\.$excl$/i", $url))
@@ -439,12 +439,12 @@ function url_purify($url, $parent_url, $can_leave_domain) {
 	$urlpath = $url_parts['path'];
 
 	$regs = Array ();
-	
+
 	while (preg_match("/[^\/]*\/[.]{2}\//", $urlpath, $regs)) {
 		$urlpath = str_replace($regs[0], "", $urlpath);
 	}
 
-	//remove relative path instructions like ../ etc 
+	//remove relative path instructions like ../ etc
 	$urlpath = preg_replace("/\/+/", "/", $urlpath);
 	$urlpath = preg_replace("/[^\/]*\/[.]{2}/", "",  $urlpath);
 	$urlpath = str_replace("./", "", $urlpath);
@@ -465,11 +465,11 @@ function url_purify($url, $parent_url, $can_leave_domain) {
 	}
 
 	$mainurl = remove_file_from_url($mainurl);
-	
+
 	if ($strip_sessids == 1) {
 		$url = remove_sessid($url);
 	}
-	//only urls in staying in the starting domain/directory are followed	
+	//only urls in staying in the starting domain/directory are followed
 	$url = convert_url($url);
 	if (strstr($url, $mainurl) == false) {
 		return '';
@@ -485,21 +485,21 @@ function save_keywords($wordarray, $link_id, $domain) {
 		$wordmd5 = substr(md5($word), 0, 1);
 		$weight = $thisword[1][2];
 		if (strlen($word)<= 30) {
-			$keyword_id = $all_keywords[$word];
-			if ($keyword_id  == "") {
-                mysql_query("insert into ".$mysql_table_prefix."keywords (keyword) values ('$word')");
-				if (mysql_errno() == 1062) { 
-					$result = mysql_query("select keyword_ID from ".$mysql_table_prefix."keywords where keyword='$word'");
+			$keyword_id = $all_keywords->get($word);
+			if (!$all_keywords->exists($word)) {
+        mysql_query("INSERT INTO {$mysql_table_prefix}keywords (keyword) VALUES ('{$word}')");
+				if (mysql_errno() == 1062) {
+					$result = mysql_query("SELECT keyword_ID FROM {$mysql_table_prefix}keywords WHERE keyword='{$word}'");
 					echo mysql_error();
 					$row = mysql_fetch_row($result);
 					$keyword_id = $row[0];
 				} else{
 				$keyword_id = mysql_insert_id();
-				$all_keywords[$word] = $keyword_id;
+				$all_keywords->set($word, $keyword_id);
 				echo mysql_error();
-			} 
-			} 
-			$inserts[$wordmd5] .= ",($link_id, $keyword_id, $weight, $domain)"; 
+			}
+			}
+			$inserts[$wordmd5] .= ",($link_id, $keyword_id, $weight, $domain)";
 		}
 	}
 
@@ -511,16 +511,16 @@ function save_keywords($wordarray, $link_id, $domain) {
 			mysql_query($query);
 			echo mysql_error();
 		}
-		
-	
+
+
 	}
 }
 
 function get_head_data($file) {
 	$headdata = "";
-           
-	preg_match("@<head[^>]*>(.*?)<\/head>@si",$file, $regs);	
-	
+
+	preg_match("@<head[^>]*>(.*?)<\/head>@si",$file, $regs);
+
 	$headdata = $regs[1];
 
 	$description = "";
@@ -577,8 +577,8 @@ function clean_file($file, $url, $type) {
 	//remove filename from path
 	$path = preg_replace('/([^\/]+)$/i', "", $urlparts['path']);
 	$file = preg_replace("/<link rel[^<>]*>/i", " ", $file);
-	$file = preg_replace("@<!--sphider_noindex-->.*?<!--\/sphider_noindex-->@si", " ",$file);	
-	$file = preg_replace("@<!--.*?-->@si", " ",$file);	
+	$file = preg_replace("@<!--sphider_noindex-->.*?<!--\/sphider_noindex-->@si", " ",$file);
+	$file = preg_replace("@<!--.*?-->@si", " ",$file);
 	$file = preg_replace("@<script[^>]*?>.*?</script>@si", " ",$file);
 	$headdata = get_head_data($file);
 	$regs = Array ();
@@ -605,8 +605,8 @@ function clean_file($file, $url, $type) {
 	if ($index_meta_keywords == 1) {
 		$file = $file." ".$headdata['keywords'];
 	}
-	
-	
+
+
 	//replace codes with ascii chars
 	$file = preg_replace('~&#x([0-9a-f]+);~ei', 'chr(hexdec("\\1"))', $file);
     $file = preg_replace('~&#([0-9]+);~e', 'chr("\\1")', $file);
@@ -616,7 +616,7 @@ function clean_file($file, $url, $type) {
 		$file = preg_replace("/".$char[0]."/i", $char[1], $file);
 	}
 	$file = preg_replace("/&[a-z]{1,6};/", " ", $file);
-	$file = preg_replace("/[\*\^\+\?\\\.\[\]\^\$\|\{\)\(\}~!\"\/@#£$%&=`´;><:,]+/", " ", $file);
+	$file = preg_replace("/[\*\^\+\?\\\.\[\]\^\$\|\{\)\(\}~!\"\/@#ï¿½$%&=`ï¿½;><:,]+/", " ", $file);
 	$file = preg_replace("/\s+/", " ", $file);
 	$data['fulltext'] = addslashes($fulltext);
 	$data['content'] = addslashes($file);
@@ -791,7 +791,7 @@ function extract_text($contents, $source_type) {
 	if (fwrite($handle, $contents) === FALSE) {
 		die ("Cannot write to file $filename");
 	}
-	
+
 	fclose($handle);
 	if ($source_type == 'pdf') {
 		$command = $pdftotext_path." $filename -";
@@ -808,7 +808,7 @@ function extract_text($contents, $source_type) {
 	}
 
 	unlink ($filename);
-	return implode(' ', $result); 
+	return implode(' ', $result);
 
 }
 
@@ -821,7 +821,7 @@ function calc_weight ($words_in_page, $word_in_title, $word_in_domain, $word_in_
 
 	return $weight;
 }
- 
+
 function  remove_sessid($url) {
 		return preg_replace("/(\?|&)(PHPSESSID|JSESSIONID|ASPSESSIONID|sid)=[0-9a-zA-Z]+$/", "", $url);
 }

@@ -94,7 +94,7 @@ if (!isset($domaincb)) {
 	}
 
 # Load keywords
-$redisClient = new Redis('192.168.1.47', 6379);
+$all_keywords = new Redis('192.168.1.47', 6379);
 
 
 if ($all ==  1) {
@@ -354,15 +354,28 @@ if ($all ==  1) {
 	}
 
 
+function __redis_keywords_load() {
+		global $mysql_table_prefix, $all_keywords;
+
+		$result = mysql_query("SELECT keyword_ID, keyword FROM {$mysql_table_prefix}keywords");
+		if (mysql_error()) {
+				echo mysql_error();
+				return false;
+		}
+		while($row=mysql_fetch_array($result)) {
+				$all_keywords->set($row[1], $row[0]);
+		}
+		return true;
+}
+
+
 	function index_site($url, $reindex, $maxlevel, $soption, $url_inc, $url_not_inc, $can_leave_domain) {
 		global $mysql_table_prefix, $command_line, $mainurl,  $tmp_urls, $domain_arr, $all_keywords;
-		if (!isset($all_keywords)) {
-			$result = mysql_query("SELECT keyword_ID, keyword FROM {$mysql_table_prefix}keywords");
-			echo mysql_error();
-			while($row=mysql_fetch_array($result)) {
-				$all_keywords[addslashes($row[1])] = $row[0];
-			}
+
+		if (!__redis_keywords_load()) {
+				return false;
 		}
+
 		$compurl = parse_url($url);
 		if ($compurl['path'] == '')
 			$url = $url . "/";
