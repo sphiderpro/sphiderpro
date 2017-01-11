@@ -4,8 +4,8 @@ date_default_timezone_set('America/Los_Angeles');
 
 include dirname(__FILE__).'/database_conf.php';
 
-$success = mysql_pconnect ($mysql_host, $mysql_user, $mysql_password);
-
+// MySQL
+$success = mysql_pconnect($mysql_host, $mysql_user, $mysql_password);
 if (!$success)
 		die ("<b>Cannot connect to database, check if username, password and host are correct.</b>");
     $success = mysql_select_db($database);
@@ -15,6 +15,6 @@ if (!$success) {
 		die();
 }
 
-
+// MongoDB
 $mongodbconn = new Mongo($mongodb_host);
 $mongodbbase = $mongodbconn->selectDB($mongodb_dbname);
