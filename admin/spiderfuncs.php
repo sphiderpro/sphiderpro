@@ -113,8 +113,8 @@ function url_status($url) {
 		socket_set_timeout($fp, 30);
 		fputs($fp, $request);
 		$answer = fgets($fp, 4096);
-		$regs = Array ();
-		if (preg_match("/HTTP/[0-9.]+ (([0-9])[0-9]{2})/", $answer, $regs)) {
+		$regs = array();
+		if (preg_match("/HTTP\/[0-9.]+ (([0-9])[0-9]{2})/", $answer, $regs)) {
 			$httpcode = $regs[2];
 			$full_httpcode = $regs[1];
 
@@ -260,9 +260,9 @@ function get_links($file, $url, $can_leave_domain, $base) {
         $url = $base;
     }
 
-	$links = array ();
-	$regs = Array ();
-	$checked_urls = Array();
+	$links = array();
+	$regs = array();
+	$checked_urls = array();
 
 	preg_match_all("/href\s*=\s*[\'\"]?([+:%\/\?~=&;\\\(\),._a-zA-Z0-9-]*)(#[.a-zA-Z0-9-]*)?[\'\" ]?(\s*rel\s*=\s*[\'\"]?(nofollow)[\'\"]?)?/i", $file, $regs, PREG_SET_ORDER);
 	foreach ($regs as $val) {

@@ -94,7 +94,8 @@ if (!isset($domaincb)) {
 	}
 
 # Load keywords
-$all_keywords = new Redis($redis_host, $redis_port);
+$all_keywords = new Redis();
+$all_keywords->connect($redis_host, $redis_port);
 
 
 if ($all ==  1) {

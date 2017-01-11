@@ -1,4 +1,7 @@
 <?php
+// TODO: move to another place
+date_default_timezone_set('America/Los_Angeles');
+
 include dirname(__FILE__).'/database_conf.php';
 
 $success = mysql_pconnect ($mysql_host, $mysql_user, $mysql_password);
