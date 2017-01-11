@@ -507,7 +507,7 @@ function save_keywords($wordarray, $link_id, $domain) {
 		$char = dechex($i);
 		$values= substr($inserts[$char], 1);
 		if ($values!="") {
-			$query = "insert into ".$mysql_table_prefix."link_keyword$char (link_id, keyword_id, weight, domain) values $values";
+			$query = "INSERT INTO {$mysql_table_prefix}link_keyword{$char} (link_id, keyword_id, weight, domain) VALUES {$values}";
 			mysql_query($query);
 			echo mysql_error();
 		}
