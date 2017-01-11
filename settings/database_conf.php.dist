@@ -1,0 +1,10 @@
+<?php
+
+$database="sphider";
+$mysql_user = "root";
+$mysql_password = "";
+$mysql_host = "localhost";
+$mysql_table_prefix = "";
+
+$redis_host = "127.0.0.1";
+$redis_port = 6379;
