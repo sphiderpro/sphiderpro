@@ -478,7 +478,7 @@ function url_purify($url, $parent_url, $can_leave_domain) {
 }
 
 function save_keywords($wordarray, $link_id, $domain) {
-	global $mysql_table_prefix, $all_keywords;
+	global $mysql_table_prefix, $all_keywords, $collection_keywords;
 	reset($wordarray);
 	while ($thisword = each($wordarray)) {
 		$word = $thisword[1][1];
@@ -487,6 +487,11 @@ function save_keywords($wordarray, $link_id, $domain) {
 		if (strlen($word)<= 30) {
 			$keyword_id = $all_keywords->get($word);
 			if (!$all_keywords->exists($word)) {
+				$kw = array();
+				$kw['_id'] = new MongoId();
+				$kw['keyword'] = $word;
+				$collection_keywords->insert($kw);
+
         mysql_query("INSERT INTO {$mysql_table_prefix}keywords (keyword) VALUES ('{$word}')");
 				if (mysql_errno() == 1062) {
 					$result = mysql_query("SELECT keyword_ID FROM {$mysql_table_prefix}keywords WHERE keyword='{$word}'");

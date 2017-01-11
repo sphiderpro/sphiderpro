@@ -97,12 +97,14 @@ if (!isset($domaincb)) {
 $all_keywords = new Redis();
 $all_keywords->connect($redis_host, $redis_port);
 
+$collection_keywords = $mongodbbase->selectCollection('keywords');
+$collection_keyword_link = $mongodbbase->selectCollection('link_keyword');
 
 if ($all ==  1) {
 		index_all();
 } else {
 		if ($reindex == 1 && $command_line == 1) {
-			$result=mysql_query("select url, spider_depth, required, disallowed, can_leave_domain from ".$mysql_table_prefix."sites where url='$url'");
+			$result=mysql_query("SELECT url, spider_depth, required, disallowed, can_leave_domain FROM {$mysql_table_prefix}sites WHERE url='{$url}'");
 			echo mysql_error();
 			if($row=mysql_fetch_row($result)) {
 				$url = $row[0];
