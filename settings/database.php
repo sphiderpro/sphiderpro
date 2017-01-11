@@ -14,3 +14,7 @@ if (!$success) {
 		print "<b>Cannot choose database, check if database name is correct.";
 		die();
 }
+
+
+$mongodbconn = new Mongo($mongodb_host);
+$mongodbbase = $mongodbconn->selectDB($mongodb_dbname);

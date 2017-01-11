@@ -511,8 +511,6 @@ function save_keywords($wordarray, $link_id, $domain) {
 			mysql_query($query);
 			echo mysql_error();
 		}
-
-
 	}
 }
 
