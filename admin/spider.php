@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*******************************************
 * Sphider Version 1.3.*
 * This program is licensed under the GNU GPL.
@@ -8,26 +8,24 @@
 * several code pieces
 ********************************************/
 
-	set_time_limit (0);
-	$include_dir = "../include";
-	include "auth.php";
-	require_once ("$include_dir/commonfuncs.php");
-	$all = 0; 
-	extract (getHttpVars());
-	$settings_dir =  "../settings";
-	require_once ("$settings_dir/conf.php");
+error_reporting (E_ALL ^ E_NOTICE ^ E_WARNING);
+set_time_limit (0);
 
-	include "messages.php";
-	include "spiderfuncs.php";
-	error_reporting (E_ALL ^ E_NOTICE ^ E_WARNING);
+$include_dir = "../include";
+include "auth.php";
+require_once ("$include_dir/commonfuncs.php");
+$all = 0;
+extract (getHttpVars());
+$settings_dir =  "../settings";
+require_once ("$settings_dir/conf.php");
 
+include "messages.php";
+include "spiderfuncs.php";
 
-	$delay_time = 0;
+$delay_time = 0;
+$command_line = 0;
 
-	
-	$command_line = 0;
-
-	if (isset($_SERVER['argv']) && $_SERVER['argc'] >= 2) {
+if (isset($_SERVER['argv']) && $_SERVER['argc'] >= 2) {
 		$command_line = 1;
 		$ac = 1; //argument counter
 		while ($ac < (count($_SERVER['argv']))) {
@@ -62,20 +60,17 @@
 				commandline_help();
 				die();
 			}
-		
+
 		}
 	}
 
-	
-	if (isset($soption) && $soption == 'full') {
+if (isset($soption) && $soption == 'full') {
 		$maxlevel = -1;
+}
 
-	}
-
-	if (!isset($domaincb)) {
+if (!isset($domaincb)) {
 		$domaincb = 0;
-
-	}
+}
 
 	if(!isset($reindex)) {
 		$reindex=0;
@@ -92,16 +87,19 @@
 		} else {
 			$log_file =  $log_dir."/".Date("ymdHi").".log";
 		}
-		
+
 		if (!$log_handle = fopen($log_file, 'w')) {
 			die ("Logging option is set, but cannot open file for logging.");
 		}
 	}
-	
-	if ($all ==  1) {
-		index_all();
-	} else {
 
+# Load keywords
+$redisClient = new Redis('192.168.1.47', 6379);
+
+
+if ($all ==  1) {
+		index_all();
+} else {
 		if ($reindex == 1 && $command_line == 1) {
 			$result=mysql_query("select url, spider_depth, required, disallowed, can_leave_domain from ".$mysql_table_prefix."sites where url='$url'");
 			echo mysql_error();
@@ -141,7 +139,7 @@
 	   return ((float)$usec + (float)$sec);
 	}
 
-	
+
 	function index_url($url, $level, $site_id, $md5sum, $domain, $indexdate, $sessid, $can_leave_domain, $reindex) {
 		global $entities, $min_delay;
 		global $command_line;
@@ -181,7 +179,7 @@
 		if ($url_status['state'] == 'ok') {
 			$OKtoIndex = 1;
 			$file_read_error = 0;
-			
+
 			if (time() - $delay_time < $min_delay) {
 				sleep ($min_delay- (time() - $delay_time));
 			}
@@ -207,7 +205,7 @@
 				$contents = getFileContents($url);
 				$file = $contents['file'];
 			}
-			
+
 
 			$pageSize = number_format(strlen($file)/1024, 2, ".", "");
 			printPageSizeReport($pageSize);
@@ -217,10 +215,10 @@
 			}
 
 			printStandardReport('starting', $command_line);
-		
+
 
 			$newmd5sum = md5($file);
-			
+
 
 			if ($md5sum == $newmd5sum) {
 				printStandardReport('md5notChanged',$command_line);
@@ -234,7 +232,7 @@
 				$urlparts = parse_url($url);
 				$newdomain = $urlparts['host'];
 				$type = 0;
-				
+
 		/*		if ($newdomain <> $domain)
 					$domainChanged = 1;
 
@@ -254,10 +252,10 @@
 					$deletable = 1;
 					printStandardReport('metaNoindex',$command_line);
 				}
-	
+
 
 				$wordarray = unique_array(explode(" ", $data['content']));
-	
+
 				if ($data['nofollow'] != 1) {
 					$links = get_links($file, $url, $can_leave_domain, $data['base']);
 					$links = distinct_array($links);
@@ -279,9 +277,9 @@
 				} else {
 					printStandardReport('noFollow',$command_line);
 				}
-				
+
 				if ($OKtoIndex == 1) {
-					
+
 					$title = $data['title'];
 					$host = $data['host'];
 					$path = $data['path'];
@@ -311,7 +309,7 @@
 							$link_id = $row[0];
 
 							save_keywords($wordarray, $link_id, $dom_id);
-							
+
 							printStandardReport('indexed', $command_line);
 						}else if (($md5sum <> '') && ($md5sum <> $newmd5sum)) { //if page has changed, start updating
 
@@ -342,9 +340,9 @@
 
 		}
 		if ($reindex ==1 && $deletable == 1) {
-			check_for_removal($url); 
+			check_for_removal($url);
 		} else if ($reindex == 1) {
-			
+
 		}
 		if (!isset($all_links)) {
 			$all_links = 0;
@@ -359,7 +357,7 @@
 	function index_site($url, $reindex, $maxlevel, $soption, $url_inc, $url_not_inc, $can_leave_domain) {
 		global $mysql_table_prefix, $command_line, $mainurl,  $tmp_urls, $domain_arr, $all_keywords;
 		if (!isset($all_keywords)) {
-			$result = mysql_query("select keyword_ID, keyword from ".$mysql_table_prefix."keywords");
+			$result = mysql_query("SELECT keyword_ID, keyword FROM {$mysql_table_prefix}keywords");
 			echo mysql_error();
 			while($row=mysql_fetch_array($result)) {
 				$all_keywords[addslashes($row[1])] = $row[0];
@@ -368,14 +366,14 @@
 		$compurl = parse_url($url);
 		if ($compurl['path'] == '')
 			$url = $url . "/";
-	
+
 		$t = microtime();
 		$a =  getenv("REMOTE_ADDR");
 		$sessid = md5 ($t.$a);
-	
-	
+
+
 		$urlparts = parse_url($url);
-	
+
 		$domain = $urlparts['host'];
 		if (isset($urlparts['port'])) {
 			$port = (int)$urlparts['port'];
@@ -383,13 +381,13 @@
 			$port = 80;
 		}
 
-		
-	
+
+
 		$result = mysql_query("select site_id from ".$mysql_table_prefix."sites where url='$url'");
 		echo mysql_error();
 		$row = mysql_fetch_row($result);
 		$site_id = $row[0];
-		
+
 		if ($site_id != "" && $reindex == 1) {
 			mysql_query ("insert into ".$mysql_table_prefix."temp (link, level, id) values ('$url', 0, '$sessid')");
 			echo mysql_error();
@@ -401,7 +399,7 @@
 					mysql_query ("insert into ".$mysql_table_prefix."temp (link, level, id) values ('$site_link', $link_level, '$sessid')");
 				}
 			}
-			
+
 			$qry = "update ".$mysql_table_prefix."sites set indexdate=now(), spider_depth = $maxlevel, required = '$url_inc'," .
 					"disallowed = '$url_not_inc', can_leave_domain=$can_leave_domain where site_id=$site_id";
 			mysql_query ($qry);
@@ -418,8 +416,8 @@
 					"disallowed = '$url_not_inc', can_leave_domain=$can_leave_domain where site_id=$site_id");
 			echo mysql_error();
 		}
-	
-	
+
+
 		$result = mysql_query("select site_id, temp_id, level, count, num from ".$mysql_table_prefix."pending where site_id='$site_id'");
 		echo mysql_error();
 		$row = mysql_fetch_row($result);
@@ -440,50 +438,50 @@
 			$pending = 1;
 			$tmp_urls = get_temp_urls($sessid);
 		}
-	
+
 		if ($reindex != 1) {
 			mysql_query ("insert into ".$mysql_table_prefix."pending (site_id, temp_id, level, count) values ('$site_id', '$sessid', '0', '0')");
 			echo mysql_error();
 		}
-	
-	
+
+
 		$time = time();
-	
-	
+
+
 		$omit = check_robot_txt($url);
-	
+
 		printHeader ($omit, $url, $command_line);
-	
-	
+
+
 		$mainurl = $url;
 		$num = 0;
-	
+
 		while (($level <= $maxlevel && $soption == 'level') || ($soption == 'full')) {
 			if ($pending == 1) {
 				$count = $pend_count;
 				$pending = 0;
 			} else
 				$count = 0;
-	
+
 			$links = array();
-	
+
 			$result = mysql_query("select distinct link from ".$mysql_table_prefix."temp where level=$level && id='$sessid' order by link");
 			echo mysql_error();
 			$rows = mysql_num_rows($result);
-	
+
 			if ($rows == 0) {
 				break;
 			}
-	
+
 			$i = 0;
-	
+
 			while ($row = mysql_fetch_array($result)) {
 				$links[] = $row['link'];
 			}
-	
+
 			reset ($links);
-	
-	
+
+
 			while ($count < count($links)) {
 				$num++;
 				$thislink = $links[$count];
@@ -492,28 +490,28 @@
 				$forbidden = 0;
 				foreach ($omit as $omiturl) {
 					$omiturl = trim($omiturl);
-	
+
 					$omiturl_parts = parse_url($omiturl);
 					if ($omiturl_parts['scheme'] == '') {
 						$check_omit = $urlparts['host'] . $omiturl;
 					} else {
 						$check_omit = $omiturl;
 					}
-	
+
 					if (strpos($thislink, $check_omit)) {
 						printRobotsReport($num, $thislink, $command_line);
-						check_for_removal($thislink); 
+						check_for_removal($thislink);
 						$forbidden = 1;
 						break;
 					}
 				}
-				
+
 				if (!check_include($thislink, $url_inc, $url_not_inc )) {
 					printUrlStringReport($num, $thislink, $command_line);
-					check_for_removal($thislink); 
+					check_for_removal($thislink);
 					$forbidden = 1;
-				} 
-	
+				}
+
 				if ($forbidden == 0) {
 					printRetrieving($num, $thislink, $command_line);
 					$query = "select md5sum, indexdate from ".$mysql_table_prefix."links where url='$thislink'";
@@ -541,21 +539,22 @@
 			}
 			$level++;
 		}
-	
+
 		mysql_query ("delete from ".$mysql_table_prefix."temp where id = '$sessid'");
 		echo mysql_error();
 		mysql_query ("delete from ".$mysql_table_prefix."pending where site_id = '$site_id'");
 		echo mysql_error();
 		printStandardReport('completed',$command_line);
-	
+
 
 	}
 
-	function index_all() {
+function index_all() {
 		global $mysql_table_prefix;
-		$result=mysql_query("select url, spider_depth, required, disallowed, can_leave_domain from ".$mysql_table_prefix."sites");
+		#
+		$result = mysql_query("SELECT url, spider_depth, required, disallowed, can_leave_domain FROM {$mysql_table_prefix}sites");
 		echo mysql_error();
-    	while ($row=mysql_fetch_row($result)) {
+  	while ($row=mysql_fetch_row($result)) {
     		$url = $row[0];
 	   		$depth = $row[1];
     		$include = $row[2];
@@ -571,7 +570,7 @@
     		}
 			index_site($url, 1, $depth, $soption, $include, $not_include, $can_leave_domain);
 		}
-	}			
+	}
 
 	function get_temp_urls ($sessid) {
 		global $mysql_table_prefix;
@@ -582,7 +581,7 @@
 			$tmp_urls[$row[0]] = 1;
 		}
 		return $tmp_urls;
-			
+
 	}
 
 	function get_domains () {
@@ -594,7 +593,7 @@
 			$domains[$row[1]] = $row[0];
 		}
 		return $domains;
-			
+
 	}
 
 	function commandline_help() {
@@ -622,5 +621,3 @@
 	if ( $log_handle) {
 		fclose($log_handle);
 	}
-
-?>

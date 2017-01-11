@@ -1,4 +1,4 @@
-create table sites(
+CREATE TABLE sites (
 	site_id int auto_increment not null primary key,
 	url varchar(255),
 	title varchar(255),
@@ -7,7 +7,9 @@ create table sites(
 	spider_depth int default 2,
 	required text,
 	disallowed text,
-	can_leave_domain bool) ENGINE = MYISAM;
+	can_leave_domain bool
+) ENGINE=MYISAM;
+
 create table links (
 	link_id int auto_increment primary key not null,
 	site_id int,
@@ -20,7 +22,7 @@ create table links (
 	md5sum varchar(32),
 	key url (url),
 	key md5key (md5sum),
-	visible int default 0, 
+	visible int default 0,
 	level int) ENGINE = MYISAM;
 create table keywords	(
 	keyword_id int primary key not null auto_increment,
@@ -140,7 +142,7 @@ create table link_keywordf (
 	key linkid(link_id),
 	key keyid(keyword_id)) ENGINE = MYISAM;
 create table categories(
-	category_id integer not null auto_increment primary key, 
+	category_id integer not null auto_increment primary key,
 	category text,
 	parent_num integer
 	) ENGINE = MYISAM;
@@ -169,6 +171,6 @@ create table query_log (
 	) ENGINE = MYISAM;
 
 create table domains (
-	domain_id int auto_increment primary key not null,	
+	domain_id int auto_increment primary key not null,
 	domain varchar(255)
 ) ENGINE = MYISAM;
